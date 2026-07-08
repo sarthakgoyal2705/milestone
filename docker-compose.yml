@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: milestone
+      POSTGRES_PASSWORD: milestone_dev_password
+      POSTGRES_DB: milestone
+    ports:
+      - "5435:5432"
+    volumes:
+      - milestone_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  milestone_postgres_data:

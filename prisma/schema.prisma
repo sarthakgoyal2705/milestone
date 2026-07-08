@@ -1,0 +1,404 @@
+// NexusHR — Prisma schema
+// Prisma 7: driver-adapter architecture, connection string lives in prisma.config.ts / lib/prisma.ts,
+// not in this file's datasource block.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------- Auth / Identity ----------
+
+enum Role {
+  EMPLOYEE
+  MANAGER
+  ADMIN
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(EMPLOYEE)
+  isActive     Boolean   @default(true)
+
+  employee      Employee?
+  resetTokens   PasswordResetToken[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// ---------- Core HR ----------
+
+enum EmploymentStatus {
+  ACTIVE
+  ON_LEAVE
+  TERMINATED
+}
+
+model Department {
+  id   String @id @default(cuid())
+  name String @unique
+
+  employees   Employee[]
+  jobPostings JobPosting[]
+
+  createdAt DateTime @default(now())
+}
+
+model Employee {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  firstName String
+  lastName  String
+  jobTitle  String
+  phone     String?
+  avatarUrl String?
+  hireDate  DateTime
+  status    EmploymentStatus @default(ACTIVE)
+
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  managerId     String?
+  manager       Employee?  @relation("EmployeeManager", fields: [managerId], references: [id])
+  directReports Employee[] @relation("EmployeeManager")
+
+  goals             Goal[]
+  leaveRequests     LeaveRequest[]
+  leaveBalances     LeaveBalance[]
+  attendanceEntries AttendanceEntry[]
+  salaryStructure   SalaryStructure?
+  payslips          Payslip[]
+  onboardingTasks   OnboardingTaskInstance[]
+  documents         Document[]
+  hiredFrom         Candidate?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([managerId])
+  @@index([departmentId])
+}
+
+// ---------- Goals / Performance ----------
+
+enum GoalStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  RETURNED
+}
+
+enum UnitOfMeasure {
+  MIN
+  MAX
+  TIMELINE
+  ZERO
+}
+
+model ReviewCycle {
+  id       String  @id @default(cuid())
+  name     String  @unique
+  order    Int
+  isActive Boolean @default(false)
+
+  goals    Goal[]
+  checkIns GoalCheckIn[]
+
+  createdAt DateTime @default(now())
+}
+
+model Goal {
+  id          String        @id @default(cuid())
+  employeeId  String
+  employee    Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  cycleId     String
+  cycle       ReviewCycle   @relation(fields: [cycleId], references: [id])
+  thrustArea  String
+  title       String
+  description String
+  target      String
+  uom         UnitOfMeasure
+  weightage   Int
+  status      GoalStatus    @default(DRAFT)
+
+  isManagerDeployed Boolean @default(false)
+
+  checkIns GoalCheckIn[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([cycleId])
+}
+
+model GoalCheckIn {
+  id        String      @id @default(cuid())
+  goalId    String
+  goal      Goal        @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  cycleId   String
+  cycle     ReviewCycle @relation(fields: [cycleId], references: [id])
+  actual    String
+  score     Float?
+
+  createdAt DateTime @default(now())
+
+  @@unique([goalId, cycleId])
+}
+
+// ---------- Leave ----------
+
+enum LeaveRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model LeaveType {
+  id                String  @id @default(cuid())
+  name              String  @unique
+  defaultAnnualDays Float
+
+  requests LeaveRequest[]
+  balances LeaveBalance[]
+}
+
+model LeaveBalance {
+  id            String    @id @default(cuid())
+  employeeId    String
+  employee      Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  leaveTypeId   String
+  leaveType     LeaveType @relation(fields: [leaveTypeId], references: [id])
+  year          Int
+  allocatedDays Float
+  usedDays      Float     @default(0)
+
+  @@unique([employeeId, leaveTypeId, year])
+}
+
+model LeaveRequest {
+  id          String              @id @default(cuid())
+  employeeId  String
+  employee    Employee            @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  leaveTypeId String
+  leaveType   LeaveType           @relation(fields: [leaveTypeId], references: [id])
+  startDate   DateTime
+  endDate     DateTime
+  daysCount   Float
+  reason      String?
+  status      LeaveRequestStatus  @default(PENDING)
+  approverId  String?
+  approvedAt  DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([employeeId])
+}
+
+// ---------- Attendance ----------
+
+model AttendanceEntry {
+  id           String    @id @default(cuid())
+  employeeId   String
+  employee     Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  clockIn      DateTime
+  clockOut     DateTime?
+  totalMinutes Int?
+  notes        String?
+
+  @@index([employeeId, clockIn])
+}
+
+// ---------- Payroll ----------
+
+model SalaryStructure {
+  id            String   @id @default(cuid())
+  employeeId    String   @unique
+  employee      Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  baseSalary    Decimal  @db.Decimal(12, 2)
+  currency      String   @default("USD")
+  allowances    Json
+  deductions    Json
+  effectiveFrom DateTime
+}
+
+model Payslip {
+  id          String   @id @default(cuid())
+  employeeId  String
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  periodStart DateTime
+  periodEnd   DateTime
+  grossPay    Decimal  @db.Decimal(12, 2)
+  netPay      Decimal  @db.Decimal(12, 2)
+  breakdown   Json
+  pdfUrl      String?
+  generatedAt DateTime @default(now())
+
+  @@index([employeeId])
+}
+
+// ---------- Recruitment / ATS ----------
+
+enum PipelineStage {
+  APPLIED
+  SCREENING
+  INTERVIEW
+  OFFER
+  HIRED
+  REJECTED
+}
+
+model JobPosting {
+  id           String      @id @default(cuid())
+  title        String
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  description  String
+  isOpen       Boolean     @default(true)
+  createdById  String
+
+  candidates Candidate[]
+
+  createdAt DateTime @default(now())
+}
+
+model Candidate {
+  id           String        @id @default(cuid())
+  jobPostingId String
+  jobPosting   JobPosting    @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  name         String
+  email        String
+  resumeUrl    String?
+  stage        PipelineStage @default(APPLIED)
+  notes        String?
+
+  hiredEmployeeId String?   @unique
+  hiredEmployee   Employee? @relation(fields: [hiredEmployeeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([jobPostingId])
+}
+
+// ---------- Onboarding ----------
+
+model OnboardingTemplate {
+  id   String @id @default(cuid())
+  name String
+
+  tasks OnboardingTaskTemplate[]
+}
+
+model OnboardingTaskTemplate {
+  id         String             @id @default(cuid())
+  templateId String
+  template   OnboardingTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  title      String
+  order      Int
+
+  instances OnboardingTaskInstance[]
+}
+
+model OnboardingTaskInstance {
+  id             String                 @id @default(cuid())
+  employeeId     String
+  employee       Employee               @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  taskTemplateId String
+  taskTemplate   OnboardingTaskTemplate @relation(fields: [taskTemplateId], references: [id], onDelete: Cascade)
+  isComplete     Boolean                @default(false)
+  completedAt    DateTime?
+
+  @@unique([employeeId, taskTemplateId])
+}
+
+// ---------- Documents ----------
+
+enum DocumentCategory {
+  ID_PROOF
+  CONTRACT
+  CERTIFICATE
+  PAYSLIP
+  OTHER
+}
+
+model Document {
+  id           String           @id @default(cuid())
+  employeeId   String
+  employee     Employee         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  category     DocumentCategory
+  fileName     String
+  blobUrl      String
+  uploadedById String
+
+  createdAt DateTime @default(now())
+
+  @@index([employeeId])
+}
+
+// ---------- Notifications ----------
+
+enum NotificationType {
+  GOAL_APPROVAL_NEEDED
+  GOAL_STATUS_CHANGED
+  LEAVE_REQUEST_SUBMITTED
+  LEAVE_STATUS_CHANGED
+  ONBOARDING_TASK_ASSIGNED
+  DOCUMENT_UPLOADED
+  PAYSLIP_GENERATED
+  GENERAL
+}
+
+model Notification {
+  id      String           @id @default(cuid())
+  userId  String
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type    NotificationType
+  title   String
+  body    String
+  linkUrl String?
+  isRead  Boolean          @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+}
+
+// ---------- Audit ----------
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  actorName  String
+  action     String
+  entityType String?
+  entityId   String?
+  timestamp  DateTime @default(now())
+
+  @@index([timestamp])
+}

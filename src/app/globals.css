@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+:root {
+  /* Warm light neutral scale — ascending numbers roughly = lighter/cleaner.
+     Repurposed from the former dark "ink" scale so existing utilities keep working. */
+  --color-ink-950: #eadecd; /* deep sand — low-alpha section & input washes */
+  --color-ink-900: #faf6f2; /* cream — app background / chrome */
+  --color-ink-800: #ffffff; /* white — card surface */
+  --color-ink-700: #f1e9dc; /* warm hover / avatar / neutral badge bg */
+  --color-ink-600: #e4d8c6; /* beige — subtle deeper accent */
+
+  /* Primary brand accent — the gold. Filled surfaces carry white text. */
+  --color-rust: #b08401;
+  --color-rust-600: #946e01;
+  --color-rust-100: #f3e7cd;
+
+  /* Interactive / link accent — a deep gold, distinct from brown body text. */
+  --color-teal: #8a6300;
+  --color-teal-600: #6f4f00;
+  --color-teal-100: #f0e6cf;
+
+  /* Soft decorative rose from the palette. */
+  --color-rose: #d49e8d;
+  --color-rose-100: #f4e6e0;
+
+  /* Warm neutrals from the palette. */
+  --color-powder: #683b2b;
+  --color-powder-100: #683b2b; /* primary text — brown */
+
+  --color-success: #2f7d5b;
+  --color-danger: #b3462f;
+  --color-warning: #9a6b0a;
+
+  --background: var(--color-ink-900);
+  --foreground: var(--color-powder-100);
+  --surface: var(--color-ink-800);
+  --surface-hover: var(--color-ink-700);
+  --hairline: rgba(104, 59, 43, 0.14);
+  --hairline-strong: rgba(104, 59, 43, 0.26);
+  --muted: rgba(104, 59, 43, 0.64);
+
+  /* Warm scrim for modal / sheet overlays (dark, so content pops on a light page). */
+  --scrim: rgba(42, 24, 16, 0.45);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-ink-950: var(--color-ink-950);
+  --color-ink-900: var(--color-ink-900);
+  --color-ink-800: var(--color-ink-800);
+  --color-ink-700: var(--color-ink-700);
+  --color-ink-600: var(--color-ink-600);
+
+  --color-rust: var(--color-rust);
+  --color-rust-600: var(--color-rust-600);
+  --color-rust-100: var(--color-rust-100);
+
+  --color-teal: var(--color-teal);
+  --color-teal-600: var(--color-teal-600);
+  --color-teal-100: var(--color-teal-100);
+
+  --color-rose: var(--color-rose);
+  --color-rose-100: var(--color-rose-100);
+
+  --color-powder: var(--color-powder);
+  --color-powder-100: var(--color-powder-100);
+
+  --color-success: var(--color-success);
+  --color-danger: var(--color-danger);
+  --color-warning: var(--color-warning);
+
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-hairline: var(--hairline);
+  --color-muted: var(--muted);
+
+  --font-display: var(--font-space-grotesk);
+  --font-sans: var(--font-ibm-plex-sans);
+  --font-mono: var(--font-ibm-plex-mono);
+
+  --ease-out-confident: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  border-color: var(--hairline);
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: var(--color-rust);
+  color: #ffffff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink-600);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-teal-600);
+}
