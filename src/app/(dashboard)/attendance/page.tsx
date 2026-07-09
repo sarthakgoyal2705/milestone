@@ -16,6 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ClockWidget } from "@/components/attendance/clock-widget";
+import { ExportButton } from "@/components/ui/export-button";
 
 export default async function AttendancePage() {
   const session = await auth();
@@ -53,14 +54,27 @@ export default async function AttendancePage() {
           </h1>
           <p className="mt-1 text-muted">Clock in and out, and review your recent history.</p>
         </div>
-        {(session.user.role === "MANAGER" || session.user.role === "ADMIN") && (
-          <Button variant="secondary" asChild>
-            <Link href="/attendance/team">
-              <UsersRound className="size-4" />
-              Team attendance
-            </Link>
-          </Button>
-        )}
+        <div className="flex gap-2">
+          <ExportButton
+            filename="attendance"
+            title="My Attendance History"
+            headers={["Date", "Clock In", "Clock Out", "Total Minutes"]}
+            rows={entries.map((entry) => [
+              format(entry.clockIn, "MMM d, yyyy"),
+              format(entry.clockIn, "h:mm a"),
+              entry.clockOut ? format(entry.clockOut, "h:mm a") : "—",
+              entry.totalMinutes !== null ? `${entry.totalMinutes}` : "—",
+            ])}
+          />
+          {(session.user.role === "MANAGER" || session.user.role === "ADMIN") && (
+            <Button variant="secondary" asChild>
+              <Link href="/attendance/team">
+                <UsersRound className="size-4" />
+                Team attendance
+              </Link>
+            </Button>
+          )}
+        </div>
       </div>
 
       <ClockWidget openEntry={openEntry ? { id: openEntry.id, clockIn: openEntry.clockIn } : null} />

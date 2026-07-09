@@ -43,6 +43,44 @@
   --scrim: rgba(42, 24, 16, 0.45);
 }
 
+[data-theme="dark"] {
+  --color-ink-950: #1a1412;
+  --color-ink-900: #0f0c0a;
+  --color-ink-800: #1e1916;
+  --color-ink-700: #2a231e;
+  --color-ink-600: #3a312a;
+
+  --color-rust: #d4a020;
+  --color-rust-600: #b8890a;
+  --color-rust-100: #2e2518;
+
+  --color-teal: #d4a020;
+  --color-teal-600: #e0b040;
+  --color-teal-100: #2a2215;
+
+  --color-rose: #d49e8d;
+  --color-rose-100: #2e201c;
+
+  --color-powder: #e8d5c4;
+  --color-powder-100: #e8d5c4;
+
+  --color-success: #4ade80;
+  --color-danger: #f87171;
+  --color-warning: #fbbf24;
+
+  --background: var(--color-ink-900);
+  --foreground: var(--color-powder-100);
+  --surface: var(--color-ink-800);
+  --surface-hover: var(--color-ink-700);
+  --hairline: rgba(232, 213, 196, 0.10);
+  --hairline-strong: rgba(232, 213, 196, 0.20);
+  --muted: rgba(232, 213, 196, 0.55);
+
+  --scrim: rgba(0, 0, 0, 0.60);
+
+  color-scheme: dark;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -89,6 +127,11 @@
 
 html {
   color-scheme: light;
+}
+
+[data-theme="dark"] html,
+html[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 body {

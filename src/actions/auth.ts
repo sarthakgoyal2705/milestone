@@ -10,6 +10,7 @@ import { sendPasswordResetEmail } from "@/lib/email";
 import { generateResetToken, hashResetToken } from "@/lib/tokens";
 import {
   loginSchema,
+  signupSchema,
   requestPasswordResetSchema,
   resetPasswordSchema,
 } from "@/lib/validations/auth";
@@ -130,6 +131,78 @@ export async function resetPasswordAction(
     actorName: "System",
     action: "Password reset via email link",
   });
+
+  return { success: true };
+}
+
+export async function signupAction(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const parsed = signupSchema.safeParse({
+    firstName: formData.get("firstName"),
+    lastName: formData.get("lastName"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
+  }
+
+  const { firstName, lastName, email, password } = parsed.data;
+
+  // Check if user already exists
+  const existingUser = await prisma.user.findUnique({ where: { email } });
+  if (existingUser) {
+    return { error: "An account with this email already exists." };
+  }
+
+  const passwordHash = await bcrypt.hash(password, 12);
+
+  // Create user and employee in a transaction
+  const newUser = await prisma.$transaction(async (tx) => {
+    const user = await tx.user.create({
+      data: {
+        email,
+        passwordHash,
+        role: "EMPLOYEE",
+      },
+    });
+
+    await tx.employee.create({
+      data: {
+        userId: user.id,
+        firstName,
+        lastName,
+        jobTitle: "New Employee",
+        hireDate: new Date(),
+      },
+    });
+
+    return user;
+  });
+
+  await writeAuditLog({
+    userId: newUser.id,
+    actorName: `${firstName} ${lastName}`,
+    action: "Signed up",
+  });
+
+  // Auto sign-in after signup
+  try {
+    await signIn("credentials", {
+      email,
+      password,
+      redirectTo: "/dashboard",
+    });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return { error: "Account created but could not sign in. Please log in manually." };
+    }
+    throw error;
+  }
 
   return { success: true };
 }

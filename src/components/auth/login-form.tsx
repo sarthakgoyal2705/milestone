@@ -121,6 +121,13 @@ export function LoginForm() {
           {!pending && <ArrowRight className="size-4" />}
         </Button>
       </form>
+
+      <p className="text-center text-sm text-muted">
+        Don&apos;t have an account?{" "}
+        <Link href="/signup" className="font-medium text-teal hover:underline">
+          Sign up
+        </Link>
+      </p>
     </div>
   );
 }

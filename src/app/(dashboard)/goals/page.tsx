@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { GoalFormDialog } from "@/components/goals/goal-form-dialog";
 import { SubmitGoalButton, DeleteGoalButton } from "@/components/goals/goal-actions";
 import { CheckInDialog } from "@/components/goals/check-in-dialog";
+import { GoalCommentsDialog } from "@/components/goals/goal-comments-dialog";
 import type { GoalStatus } from "@/generated/prisma/enums";
 
 const STATUS_VARIANT: Record<GoalStatus, "neutral" | "warning" | "success" | "danger"> = {
@@ -40,8 +41,25 @@ export default async function GoalsPage() {
 
   const goals = await prisma.goal.findMany({
     where: { employeeId: session.user.employeeId },
-    include: { checkIns: { include: { cycle: true }, orderBy: { cycle: { order: "asc" } } } },
+    include: { 
+      checkIns: { include: { cycle: true }, orderBy: { cycle: { order: "asc" } } },
+    },
     orderBy: { createdAt: "asc" },
+  });
+
+  // Fetch comments separately since it's a polymorphic relation not directly on Goal in Prisma
+  const goalIds = goals.map(g => g.id);
+  const comments = await prisma.comment.findMany({
+    where: { entityType: "goal", entityId: { in: goalIds } },
+    include: {
+      user: {
+        select: {
+          email: true,
+          employee: { select: { firstName: true, lastName: true, avatarUrl: true } }
+        }
+      }
+    },
+    orderBy: { createdAt: "asc" }
   });
 
   const totalWeightage = goals.reduce((sum, g) => sum + g.weightage, 0);
@@ -179,6 +197,14 @@ export default async function GoalsPage() {
                     )}
                   </div>
                 )}
+                
+                <div className="flex items-center gap-2 border-t border-hairline pt-3 mt-1">
+                  <GoalCommentsDialog 
+                    goalId={goal.id} 
+                    goalTitle={goal.title} 
+                    comments={comments.filter((c) => c.entityId === goal.id)} 
+                  />
+                </div>
               </CardContent>
             </Card>
           );

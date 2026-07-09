@@ -7,6 +7,8 @@ import { prisma } from "@/lib/prisma";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
 import { UserMenu } from "@/components/layout/user-menu";
 import { NotificationBell } from "@/components/layout/notification-bell";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { GlobalSearch } from "@/components/layout/global-search";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
@@ -56,8 +58,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </SheetContent>
           </Sheet>
 
+          <GlobalSearch />
           <div className="flex-1" />
 
+          <ThemeToggle />
           <NotificationBell notifications={notifications} unreadCount={unreadCount} />
           <UserMenu name={displayName} role={user.role} />
         </header>

@@ -6,6 +6,7 @@ import { differenceInCalendarDays } from "date-fns";
 import { prisma } from "@/lib/prisma";
 import { requireRole, requireSession } from "@/lib/rbac";
 import { writeAuditLog } from "@/lib/audit";
+import { sendSystemNotification } from "@/lib/email";
 import {
   leaveTypeSchema,
   renameLeaveTypeSchema,
@@ -193,6 +194,13 @@ export async function createLeaveRequestAction(
     },
     include: { employee: { include: { manager: { include: { user: true } } } }, leaveType: true },
   });
+
+  await sendSystemNotification(
+    session.user.id,
+    session.user.email ?? "",
+    "Leave Request Submitted",
+    `<p>Your leave request for ${daysCount} day(s) from ${request.startDate.toDateString()} to ${request.endDate.toDateString()} has been submitted and is pending approval.</p>`
+  );
 
   if (request.employee.manager) {
     await prisma.notification.create({

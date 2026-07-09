@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   postgres:
     image: postgres:16
@@ -10,6 +12,20 @@ services:
       - "5435:5432"
     volumes:
       - milestone_postgres_data:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://milestone:milestone_dev_password@postgres:5432/milestone?schema=public
+      - NEXTAUTH_SECRET=super_secret_string_change_me_in_production
+      - NEXTAUTH_URL=http://localhost:3000
+    depends_on:
+      - postgres
 
 volumes:
   milestone_postgres_data:

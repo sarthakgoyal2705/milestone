@@ -30,6 +30,8 @@ model User {
   resetTokens   PasswordResetToken[]
   notifications Notification[]
   auditLogs     AuditLog[]
+  recognitionsSent Recognition[] @relation("RecognitionFrom")
+  comments      Comment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -95,6 +97,12 @@ model Employee {
   documents         Document[]
   hiredFrom         Candidate?
 
+  recognitionsReceived Recognition[] @relation("RecognitionTo")
+  reviewsGiven         PerformanceReview[] @relation("ReviewsGiven")
+  reviewsReceived      PerformanceReview[]
+  assignedAssets       Asset[]
+  timesheets           TimesheetEntry[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -126,6 +134,7 @@ model ReviewCycle {
 
   goals    Goal[]
   checkIns GoalCheckIn[]
+  performanceReviews PerformanceReview[]
 
   createdAt DateTime @default(now())
 }
@@ -401,4 +410,111 @@ model AuditLog {
   timestamp  DateTime @default(now())
 
   @@index([timestamp])
+}
+
+// ---------- Phase 2 Additions ----------
+
+model Holiday {
+  id        String   @id @default(cuid())
+  name      String
+  date      DateTime
+  region    String?  // e.g. "US", "IN", or null for company-wide
+  createdAt DateTime @default(now())
+}
+
+model Recognition {
+  id           String   @id @default(cuid())
+  fromUserId   String
+  fromUser     User     @relation("RecognitionFrom", fields: [fromUserId], references: [id])
+  toEmployeeId String
+  toEmployee   Employee @relation("RecognitionTo", fields: [toEmployeeId], references: [id])
+  badge        String   // e.g. "star", "rocket", "heart", "trophy"
+  message      String
+  createdAt    DateTime @default(now())
+  
+  @@index([toEmployeeId])
+}
+
+model PerformanceReview {
+  id           String      @id @default(cuid())
+  employeeId   String
+  employee     Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  reviewerId   String
+  reviewer     Employee    @relation("ReviewsGiven", fields: [reviewerId], references: [id])
+  cycleId      String
+  cycle        ReviewCycle @relation(fields: [cycleId], references: [id])
+  type         ReviewType
+  rating       Int?
+  strengths    String?
+  improvements String?
+  comments     String?
+  submittedAt  DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@unique([employeeId, reviewerId, cycleId])
+  @@index([employeeId])
+}
+
+enum ReviewType {
+  SELF
+  MANAGER
+  PEER
+}
+
+model Asset {
+  id           String      @id @default(cuid())
+  name         String
+  type         AssetType
+  serialNumber String?     @unique
+  assignedToId String?
+  assignedTo   Employee?   @relation(fields: [assignedToId], references: [id])
+  assignedAt   DateTime?
+  status       AssetStatus @default(AVAILABLE)
+  notes        String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([assignedToId])
+}
+
+enum AssetType {
+  LAPTOP
+  PHONE
+  MONITOR
+  BADGE
+  KEY
+  OTHER
+}
+
+enum AssetStatus {
+  AVAILABLE
+  ASSIGNED
+  MAINTENANCE
+  RETIRED
+}
+
+model TimesheetEntry {
+  id          String   @id @default(cuid())
+  employeeId  String
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  date        DateTime
+  project     String
+  hours       Float
+  description String?
+  createdAt   DateTime @default(now())
+
+  @@index([employeeId, date])
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entityType String   // "goal", "leave_request", "candidate"
+  entityId   String
+  body       String
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
 }

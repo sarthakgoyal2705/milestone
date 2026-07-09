@@ -15,6 +15,8 @@ import {
 import { PayslipBreakdownDialog } from "@/components/payroll/payslip-breakdown-dialog";
 import type { LineItem } from "@/components/payroll/line-items-editor";
 
+import { ExportButton } from "@/components/ui/export-button";
+
 export default async function PayslipsPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
@@ -41,11 +43,27 @@ export default async function PayslipsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-powder-100">
-          Payslips
-        </h1>
-        <p className="mt-1 text-muted">Your pay history.</p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-powder-100">
+            Payslips
+          </h1>
+          <p className="mt-1 text-muted">Your pay history.</p>
+        </div>
+        <ExportButton
+          filename="payslips"
+          title="My Payslips History"
+          headers={["Period", "Gross Pay", "Net Pay", "Generated"]}
+          rows={payslips.map((payslip) => {
+            const breakdown = payslip.breakdown as { currency: string };
+            return [
+              `${format(payslip.periodStart, "MMM d, yyyy")} – ${format(payslip.periodEnd, "MMM d, yyyy")}`,
+              `${breakdown.currency} ${Number(payslip.grossPay).toLocaleString()}`,
+              `${breakdown.currency} ${Number(payslip.netPay).toLocaleString()}`,
+              format(payslip.generatedAt, "MMM d, yyyy"),
+            ];
+          })}
+        />
       </div>
 
       <Card>

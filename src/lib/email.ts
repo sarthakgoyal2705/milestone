@@ -23,3 +23,18 @@ export async function sendPasswordResetEmail(email: string, resetUrl: string) {
     `,
   });
 }
+
+export async function sendSystemNotification(toUserId: string, email: string, subject: string, htmlBody: string) {
+  if (!resend) {
+    console.log(
+      `\n[dev] EMAIL NOTIFICATION TO: ${email}\n[dev] Subject: ${subject}\n[dev] Body: ${htmlBody}\n`
+    );
+  } else {
+    await resend.emails.send({
+      from: FROM,
+      to: email,
+      subject,
+      html: htmlBody,
+    });
+  }
+}

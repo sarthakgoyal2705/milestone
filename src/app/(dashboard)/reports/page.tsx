@@ -17,6 +17,8 @@ const GOAL_STAGE_LABEL: Record<string, string> = {
 
 const GOAL_STAGE_ORDER = ["DRAFT", "PENDING_APPROVAL", "APPROVED", "RETURNED"];
 
+import { ExportButton } from "@/components/ui/export-button";
+
 export default async function ReportsPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
@@ -60,11 +62,19 @@ export default async function ReportsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-powder-100">
-          Reports
-        </h1>
-        <p className="mt-1 text-muted">A snapshot of headcount, approvals, and hiring.</p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-powder-100">
+            Reports
+          </h1>
+          <p className="mt-1 text-muted">A snapshot of headcount, approvals, and hiring.</p>
+        </div>
+        <ExportButton
+          filename="reports"
+          title="Headcount by Department"
+          headers={["Department", "Active Headcount"]}
+          rows={departmentData.map((d) => [d.name, String(d.count)])}
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

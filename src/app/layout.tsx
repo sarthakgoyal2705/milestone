@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "@/components/layout/theme-provider";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -22,8 +23,10 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Milestone",
-  description: "The performance, people, and payroll platform for modern teams.",
+  title: "Milestone | Modern HR Platform",
+  description: "Next-gen HR management for modern teams",
+  manifest: "/manifest.json",
+  themeColor: "#B08401",
 };
 
 export default function RootLayout({
@@ -34,9 +37,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
+      <head>
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <ThemeProvider>
         {children}
         <Toaster
           position="top-right"
@@ -51,6 +59,26 @@ export default function RootLayout({
               actionButton: "bg-rust text-powder-100 rounded-sm px-2 py-1",
               cancelButton: "bg-ink-700 text-powder-100 rounded-sm px-2 py-1",
             },
+          }}
+        />
+        </ThemeProvider>
+        {/* Register PWA Service Worker */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(
+                    function(registration) {
+                      console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    },
+                    function(err) {
+                      console.log('ServiceWorker registration failed: ', err);
+                    }
+                  );
+                });
+              }
+            `,
           }}
         />
       </body>

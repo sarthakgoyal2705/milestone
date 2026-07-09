@@ -11,6 +11,7 @@ import {
   RejectCandidateButton,
 } from "@/components/recruitment/candidate-stage-actions";
 import { HireCandidateDialog } from "@/components/recruitment/hire-candidate-dialog";
+import { GenerateOfferLetterButton } from "@/components/recruitment/generate-offer-letter-button";
 import type { PipelineStage } from "@/generated/prisma/enums";
 
 const STAGE_ORDER: PipelineStage[] = [
@@ -112,14 +113,20 @@ export default async function JobPostingDetailPage({
                   <div className="flex items-center gap-2">
                     <Badge variant={STAGE_VARIANT[candidate.stage]}>{candidate.stage}</Badge>
                     {candidate.stage === "OFFER" && (
-                      <HireCandidateDialog
-                        candidateId={candidate.id}
-                        candidateName={candidate.name}
-                        candidateEmail={candidate.email}
-                        departments={departments}
-                        managers={managers}
-                        templates={templates}
-                      />
+                      <>
+                        <GenerateOfferLetterButton 
+                          candidateName={candidate.name} 
+                          jobTitle={posting.title} 
+                        />
+                        <HireCandidateDialog
+                          candidateId={candidate.id}
+                          candidateName={candidate.name}
+                          candidateEmail={candidate.email}
+                          departments={departments}
+                          managers={managers}
+                          templates={templates}
+                        />
+                      </>
                     )}
                     {candidate.stage !== "HIRED" && candidate.stage !== "REJECTED" && (
                       <>
