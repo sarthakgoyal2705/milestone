@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Send } from "lucide-react";
 import { toast } from "sonner";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { addCommentAction } from "@/actions/comments";
@@ -62,11 +62,10 @@ export function CommentThread({ entityType, entityId, comments }: CommentThreadP
 
             return (
               <div key={comment.id} className="flex gap-3">
-                <Avatar
-                  src={comment.user.employee?.avatarUrl}
-                  fallback={authorName.charAt(0)}
-                  size="sm"
-                />
+                <Avatar className="size-8">
+                  <AvatarImage src={comment.user.employee?.avatarUrl || undefined} />
+                  <AvatarFallback>{authorName.charAt(0)}</AvatarFallback>
+                </Avatar>
                 <div className="flex flex-1 flex-col rounded-lg bg-surface-hover px-4 py-3 text-sm">
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-medium text-powder-100">{authorName}</span>

@@ -1,5 +1,5 @@
 import { formatDistanceToNow } from "date-fns";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { BADGES } from "@/components/recognition/give-kudos-dialog";
 
 type KudosCardProps = {
@@ -50,11 +50,10 @@ export function KudosCard({ recognition }: KudosCardProps) {
         <p className="text-sm text-muted/90 italic">&ldquo;{recognition.message}&rdquo;</p>
         <div className="flex items-center gap-2 pt-1">
           <span className="text-xs text-muted">From</span>
-          <Avatar
-            src={recognition.fromUser.employee?.avatarUrl}
-            fallback={fromName.charAt(0)}
-            size="sm"
-          />
+          <Avatar className="size-6">
+            <AvatarImage src={recognition.fromUser.employee?.avatarUrl || undefined} />
+            <AvatarFallback>{fromName.charAt(0)}</AvatarFallback>
+          </Avatar>
           <span className="text-xs font-medium text-muted">{fromName}</span>
         </div>
       </div>
