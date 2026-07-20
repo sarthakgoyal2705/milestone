@@ -33,7 +33,7 @@ export function GenerateOfferLetterButton({ candidateName, jobTitle }: GenerateO
   };
 
   return (
-    <Button size="sm" variant="outline" className="gap-2" onClick={handleGenerate}>
+    <Button size="sm" variant="secondary" className="gap-2" onClick={handleGenerate}>
       <FileText className="size-4" />
       Generate Offer Letter
     </Button>

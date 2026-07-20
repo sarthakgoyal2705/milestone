@@ -129,7 +129,7 @@ export function AddAssetDialog({ employees }: AddAssetDialogProps) {
           </div>
 
           <div className="mt-4 flex justify-end gap-3 pt-2 border-t border-hairline">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={isPending}>

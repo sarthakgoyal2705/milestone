@@ -87,13 +87,13 @@ export function CalendarGrid({ events, month, onMonthChange }: CalendarGridProps
           {format(monthStart, "MMMM yyyy")}
         </h2>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={() => onMonthChange(subMonths(month, 1))}>
+          <Button variant="secondary" size="icon" onClick={() => onMonthChange(subMonths(month, 1))}>
             <ChevronLeft className="size-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => onMonthChange(new Date())}>
+          <Button variant="secondary" size="sm" onClick={() => onMonthChange(new Date())}>
             Today
           </Button>
-          <Button variant="outline" size="icon" onClick={() => onMonthChange(addMonths(month, 1))}>
+          <Button variant="secondary" size="icon" onClick={() => onMonthChange(addMonths(month, 1))}>
             <ChevronRight className="size-4" />
           </Button>
         </div>

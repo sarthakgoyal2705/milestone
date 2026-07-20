@@ -116,7 +116,7 @@ export function ReviewFormDialog({
           </div>
 
           <div className="mt-4 flex justify-end gap-3 border-t border-hairline pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={isPending}>
