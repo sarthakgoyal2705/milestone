@@ -60,7 +60,7 @@ export function ReviewFormDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant={type === "SELF" ? "default" : "secondary"} className="gap-2">
+        <Button size="sm" variant={type === "SELF" ? "primary" : "secondary"} className="gap-2">
           <ClipboardEdit className="size-4" />
           {type === "SELF" ? "Write Self-Review" : "Write Review"}
         </Button>
