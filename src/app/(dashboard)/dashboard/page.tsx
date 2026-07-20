@@ -115,7 +115,7 @@ export default async function DashboardPage() {
                       </div>
                     </div>
                   ))}
-                  <Button variant="outline" size="sm" asChild className="w-full mt-2">
+                  <Button variant="secondary" size="sm" asChild className="w-full mt-2">
                     <Link href="/goals">View Goals</Link>
                   </Button>
                 </div>
