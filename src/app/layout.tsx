@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/layout/theme-provider";
@@ -26,6 +26,9 @@ export const metadata: Metadata = {
   title: "Milestone | Modern HR Platform",
   description: "Next-gen HR management for modern teams",
   manifest: "/manifest.json",
+};
+
+export const viewport: Viewport = {
   themeColor: "#B08401",
 };
 
@@ -40,9 +43,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
-      <head>
-        <link rel="apple-touch-icon" href="/icon-192.png" />
-      </head>
+
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider>
         {children}
