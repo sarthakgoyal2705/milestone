@@ -19,6 +19,7 @@ import {
   Star,
   Clock8,
   Monitor,
+  ListChecks,
 } from "lucide-react";
 import type { Role } from "@/generated/prisma/enums";
 
